@@ -127,6 +127,7 @@ def run_reproduction(data_dir: Path, force_download: bool = False, as_json: bool
     piv_cyc = df.pivot(index="HoursElapsed_key", columns="Meter", values="CycleIndex")
 
     any_qf = piv_qf.any(axis=1)
+    valid_dc_mask = piv_p["PDC"].notna()
     use_mask = piv_use["PGCP"].astype(bool)
 
     soc_non_null = df["SOC"].dropna()
@@ -143,6 +144,15 @@ def run_reproduction(data_dir: Path, force_download: bool = False, as_json: bool
         ("Grid connection (PGCP) - excl. quality-flagged rows", energy_ratio(piv_p.loc[~any_qf, "PGCP"])),
         ("Grid connection (PGCP) - authors' \"Use\" segments", energy_ratio(piv_p.loc[use_mask, "PGCP"])),
     ]
+
+    common_pdc = energy_ratio(piv_p.loc[valid_dc_mask, "PDC"])
+    common_pac = energy_ratio(piv_p.loc[valid_dc_mask, "PAC"])
+    common_pgcp = energy_ratio(piv_p.loc[valid_dc_mask, "PGCP"])
+    full_pgcp = rows[2][1]
+
+    boundary_shift_pp = common_pdc["ratio_pct"] - common_pgcp["ratio_pct"]
+    window_shift_pp = full_pgcp["ratio_pct"] - common_pgcp["ratio_pct"]
+    disconnected_min = int((~valid_dc_mask).sum())
 
     if as_json:
         payload = {
@@ -168,6 +178,16 @@ def run_reproduction(data_dir: Path, force_download: bool = False, as_json: bool
                 }
                 for label, res in rows
             ],
+            "common_window_isolation": {
+                "common_window_min": int(valid_dc_mask.sum()),
+                "disconnected_dc_min": disconnected_min,
+                "pdc_common_pct": round(common_pdc["ratio_pct"], 6),
+                "pac_common_pct": round(common_pac["ratio_pct"], 6),
+                "pgcp_common_pct": round(common_pgcp["ratio_pct"], 6),
+                "pgcp_full_pct": round(full_pgcp["ratio_pct"], 6),
+                "pure_boundary_shift_pp": round(boundary_shift_pp, 6),
+                "window_extension_shift_pp": round(window_shift_pp, 6),
+            },
         }
         print(json.dumps(payload, indent=2))
         return 0
@@ -184,10 +204,30 @@ def run_reproduction(data_dir: Path, force_download: bool = False, as_json: bool
     print(f"System SoC span  : {soc_start_pct:.1f}% start -> {soc_end_pct:.1f}% end")
     print(f"Authors' Use rule: {use_segments} of {total_segments} CycleIndex segments selected")
     print("-" * 78)
-    print(f"{'Measurement / Selection Rule':52s} {'Intervals':>10s} {'Ratio':>8s}")
+    print(f"{'Measurement / Selection Rule':50s} {'Intervals':>10s} {'1dp':>7s} {'Exact':>9s}")
     print("-" * 78)
     for label, res in rows:
-        print(f"{label:52s} {res['intervals']:8,d} min {res['ratio_pct']:6.1f}%")
+        print(
+            f"{label:50s} {res['intervals']:8,d} m {res['ratio_pct']:6.1f}% "
+            f"{res['ratio_pct']:7.3f}%"
+        )
+    print("-" * 78)
+    print(f"BOUNDARY VS. WINDOW ISOLATION (common valid-DC window = {int(valid_dc_mask.sum()):,} min):")
+    print(
+        f"  Common window ({int(valid_dc_mask.sum()):,} min): PGCP = {common_pgcp['ratio_pct']:.3f}%, "
+        f"PAC = {common_pac['ratio_pct']:.3f}%, PDC = {common_pdc['ratio_pct']:.3f}%"
+    )
+    print(
+        f"  Pure boundary effect (PGCP -> PDC, same {int(valid_dc_mask.sum()):,} min): "
+        f"{common_pgcp['ratio_pct']:.3f}% -> {common_pdc['ratio_pct']:.3f}% "
+        f"(+{boundary_shift_pp:.3f} pp)"
+    )
+    print(
+        f"  Window extension (PGCP {int(valid_dc_mask.sum()):,} -> {len(piv_p):,} min, "
+        f"+{disconnected_min:,} standby min): "
+        f"{common_pgcp['ratio_pct']:.3f}% -> {full_pgcp['ratio_pct']:.3f}% "
+        f"({window_shift_pp:+.3f} pp)"
+    )
     print("-" * 78)
     print("IMPORTANT EPISTEMIC BOUNDARY:")
     print("  1. These values are DESCRIPTIVE exported-to-imported energy ratios,")

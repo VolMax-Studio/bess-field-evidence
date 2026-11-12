@@ -8,11 +8,20 @@ Using the published 1-minute field dataset from the **PNNL / EPRI Grid-Scale BES
 
 | Measurement Boundary & Selection Rule | Valid Intervals | Exported / Imported Ratio |
 |---|---:|---:|
-| **Battery DC (`PDC`)** — valid DC intervals only (`Power` non-null) | 70,105 min | **88.9%** (`88.87%`) |
-| **Inverter AC (`PAC`)** — full observation period | 85,858 min | **82.2%** (`82.25%`) |
-| **Grid connection (`PGCP`)** — full observation period | 85,858 min | **74.5%** (`74.49%`) |
-| **Grid connection (`PGCP`)** — excluding quality-flagged rows | 70,003 min | **75.5%** (`75.54%`) |
-| **Grid connection (`PGCP`)** — authors' `Use` segments (65 / 214) | 19,487 min | **79.8%** (`79.78%`) |
+| **Battery DC (`PDC`)** — valid DC intervals only (`Power` non-null) | 70,105 min | **88.9%** (`88.865%`) |
+| **Inverter AC (`PAC`)** — full observation period | 85,858 min | **82.2%** (`82.245%`) |
+| **Grid connection (`PGCP`)** — full observation period | 85,858 min | **74.5%** (`74.486%`) |
+| **Grid connection (`PGCP`)** — excluding quality-flagged rows | 70,003 min | **75.5%** (`75.542%`) |
+| **Grid connection (`PGCP`)** — authors' `Use` segments (65 / 214) | 19,487 min | **79.8%** (`79.781%`) |
+
+## Isolating Boundary Effect vs. Observation-Window Extension
+
+Comparing `PDC` (`70,105 min`) directly against full-series `PGCP` (`85,858 min`) mixes the metering boundary with `15,753` disconnected-DC standby minutes (`dc_v == 0`, where `PAC == 0` and `PGCP` records standby auxiliary import). Evaluating `PDC`, `PAC`, and `PGCP` on the **exact same `70,105`-minute common window** cleanly separates the two effects:
+
+| Comparison | Intervals | Ratio Shift | Interpretation |
+|---|---:|---:|---|
+| **`PGCP` vs. `PDC` on common valid-DC window** (`PAC = 82.245%`) | 70,105 min | **`75.607%` → `88.865%`** (`+13.259 pp` unrounded) | **Pure metering boundary effect** (inverter + transformer + auxiliary loads within identical timestamps) |
+| **`PGCP` common valid-DC vs. `PGCP` full series** | 70,105 → 85,858 min | **`75.607%` → `74.486%`** (`−1.120 pp` unrounded) | **Time-window extension effect** (adding `15,753` disconnected-DC standby minutes) |
 
 ## Epistemic boundaries & limitations
 

@@ -11,7 +11,7 @@ Each case study in this repository follows strict epistemic rules:
 
 ### 1. [`enw-pnnl-epri/`](./enw-pnnl-epri/) — One BESS dataset, five plausible energy ratios
 - **Source:** PNNL / EPRI Grid-Scale BESS Operational Datasets (`ENW`, DOI [`10.5281/zenodo.22947521`](https://doi.org/10.5281/zenodo.22947521), `CC-BY-4.0`)
-- **Result:** Changing only the metering boundary (`PDC`, `PAC`, `PGCP`) or interval-selection rule (`full`, `QualityFlag` exclusion, authors' `Use` segments) yields five distinct exported-to-imported ratios from **`74.5%`** to **`88.9%`** on the exact same 1-minute dataset.
+- **Result:** Across the 1-minute `ENW` dataset, five standard boundary/selection choices span **`74.5%`** to **`88.9%`**. Isolating the common `70,105`-minute valid-DC window separates the pure metering boundary effect (**`75.607% -> 88.865%`**, **`+13.259 pp`** unrounded from `PGCP` to `PDC`) from extending `PGCP` to the full `85,858`-minute series (**`75.607% -> 74.486%`**, **`-1.120 pp`** unrounded from `15,753` disconnected-DC standby minutes).
 - **Quick run:**
   ```bash
   pip install -r requirements.txt
