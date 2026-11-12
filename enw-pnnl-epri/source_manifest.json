@@ -1,0 +1,40 @@
+{
+  "dataset_name": "Grid-Scale BESS Operational Datasets for Battery Modeling Research (ENW subset)",
+  "site_code": "ENW",
+  "record_id": "22947521",
+  "doi": "10.5281/zenodo.22947521",
+  "record_url": "https://zenodo.org/records/22947521",
+  "api_url": "https://zenodo.org/api/records/22947521",
+  "publication_date": "2026-09-25",
+  "creators": [
+    "Crawford, Alasdair",
+    "Thompson, Joe"
+  ],
+  "license": "CC-BY-4.0",
+  "files": [
+    {
+      "filename": "ENW.feather",
+      "download_url": "https://zenodo.org/api/records/22947521/files/ENW.feather/content",
+      "size_bytes": 6897434,
+      "md5": "d2d58c153d6674ce8ef8242e497dd9b1",
+      "sha256": "99dea934c5bfbf1fd6c88365275b41194351eae5a9ccb899b863bb2f75cad943",
+      "required_for_reproduction": true
+    },
+    {
+      "filename": "ENW.R",
+      "download_url": "https://zenodo.org/api/records/22947521/files/ENW.R/content",
+      "size_bytes": 1880,
+      "md5": "9d578d40bcb38130cf1841a93b0aa471",
+      "sha256": "52fe04d32e36ce2f524a79a1020989db608c18a78b04c3bde7f6c64543546497",
+      "required_for_reproduction": false
+    },
+    {
+      "filename": "_common.R",
+      "download_url": "https://zenodo.org/api/records/22947521/files/_common.R/content",
+      "size_bytes": 21674,
+      "md5": "03805d1b2fab980ff9c37954fad5e030",
+      "sha256": "a385f9d4e5a01d6969b97f0f4b61e0ea1da5923a640e8efeaa266621a59d3210",
+      "required_for_reproduction": false
+    }
+  ]
+}

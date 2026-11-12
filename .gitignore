@@ -1,0 +1,10 @@
+# Cached downloaded datasets (fetched from official repositories on demand)
+enw-pnnl-epri/data/
+*.feather
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
