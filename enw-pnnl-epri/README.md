@@ -14,14 +14,14 @@ Using the published 1-minute field dataset from the **PNNL / EPRI Grid-Scale BES
 | **Grid connection (`PGCP`)** — excluding quality-flagged rows | 70,003 min | **75.5%** (`75.542%`) |
 | **Grid connection (`PGCP`)** — authors' `Use` segments (65 / 214) | 19,487 min | **79.8%** (`79.781%`) |
 
-## Isolating Boundary Effect vs. Observation-Window Extension
+## Isolating Boundary Choice vs. Interval-Set Extension
 
-Comparing `PDC` (`70,105 min`) directly against full-series `PGCP` (`85,858 min`) mixes the metering boundary with `15,753` disconnected-DC standby minutes (`dc_v == 0`, where `PAC == 0` and `PGCP` records standby auxiliary import). Evaluating `PDC`, `PAC`, and `PGCP` on the **exact same `70,105`-minute common window** cleanly separates the two effects:
+Comparing `PDC` (`70,105 min`) directly against full-series `PGCP` (`85,858 min`) mixes the metering boundary with `15,753` disconnected-DC standby minutes (`dc_v == 0`, where `PAC == 0` and `PGCP` records standby auxiliary import). Evaluating `PDC`, `PAC`, and `PGCP` on the **exact same `70,105`-minute common set of valid-DC timestamps** (a non-contiguous selection that still includes `102` quality-flagged intervals) cleanly separates the two effects:
 
 | Comparison | Intervals | Ratio Shift | Interpretation |
 |---|---:|---:|---|
-| **`PGCP` vs. `PDC` on common valid-DC window** (`PAC = 82.245%`) | 70,105 min | **`75.607%` → `88.865%`** (`+13.259 pp` unrounded) | **Pure metering boundary effect** (inverter + transformer + auxiliary loads within identical timestamps) |
-| **`PGCP` common valid-DC vs. `PGCP` full series** | 70,105 → 85,858 min | **`75.607%` → `74.486%`** (`−1.120 pp` unrounded) | **Time-window extension effect** (adding `15,753` disconnected-DC standby minutes) |
+| **`PGCP` vs. `PDC` on common valid-DC timestamp set** (`PAC = 82.245%`) | 70,105 min | **`75.607%` → `88.865%`** (`+13.259 pp` unrounded) | **Metering-boundary ratio difference on identical timestamps** (descriptive difference across meter scopes; does not by itself attribute exact losses to inverter, transformer, or auxiliaries) |
+| **`PGCP` common valid-DC set vs. `PGCP` full series** | 70,105 → 85,858 min | **`75.607%` → `74.486%`** (`−1.120 pp` unrounded) | **Interval-set extension effect** (adding `15,753` disconnected-DC standby minutes) |
 
 ## Epistemic boundaries & limitations
 
@@ -40,6 +40,9 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 python enw-pnnl-epri/reproduce.py
+# Optional: regenerate five_ratios.png (requires matplotlib)
+pip install matplotlib
+python enw-pnnl-epri/render_five_ratios.py
 ```
 
 The script automatically downloads `ENW.feather` (`6.9 MB`) from the official Zenodo API URL recorded in [`source_manifest.json`](./source_manifest.json), verifies both `MD5` and `SHA-256` checksums, checks uniform 60.0 s spacing, and prints all five ratios along with the scope disclaimers.

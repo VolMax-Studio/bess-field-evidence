@@ -212,18 +212,18 @@ def run_reproduction(data_dir: Path, force_download: bool = False, as_json: bool
             f"{res['ratio_pct']:7.3f}%"
         )
     print("-" * 78)
-    print(f"BOUNDARY VS. WINDOW ISOLATION (common valid-DC window = {int(valid_dc_mask.sum()):,} min):")
+    print(f"BOUNDARY VS. INTERVAL-SET ISOLATION (common valid-DC set = {int(valid_dc_mask.sum()):,} min, incl. 102 flagged):")
     print(
-        f"  Common window ({int(valid_dc_mask.sum()):,} min): PGCP = {common_pgcp['ratio_pct']:.3f}%, "
+        f"  Common timestamps ({int(valid_dc_mask.sum()):,} min): PGCP = {common_pgcp['ratio_pct']:.3f}%, "
         f"PAC = {common_pac['ratio_pct']:.3f}%, PDC = {common_pdc['ratio_pct']:.3f}%"
     )
     print(
-        f"  Pure boundary effect (PGCP -> PDC, same {int(valid_dc_mask.sum()):,} min): "
+        f"  Boundary ratio shift (PGCP -> PDC, same {int(valid_dc_mask.sum()):,} min): "
         f"{common_pgcp['ratio_pct']:.3f}% -> {common_pdc['ratio_pct']:.3f}% "
-        f"(+{boundary_shift_pp:.3f} pp)"
+        f"(+{boundary_shift_pp:.3f} pp; descriptive shift, not loss attribution)"
     )
     print(
-        f"  Window extension (PGCP {int(valid_dc_mask.sum()):,} -> {len(piv_p):,} min, "
+        f"  Interval-set extension (PGCP {int(valid_dc_mask.sum()):,} -> {len(piv_p):,} min, "
         f"+{disconnected_min:,} standby min): "
         f"{common_pgcp['ratio_pct']:.3f}% -> {full_pgcp['ratio_pct']:.3f}% "
         f"({window_shift_pp:+.3f} pp)"
