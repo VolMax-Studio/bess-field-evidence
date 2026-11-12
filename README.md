@@ -1,23 +1,47 @@
-# bess-field-evidence
+# BESS Field Evidence — VolMax Studio Lab
 
-Minimal, reproducible field-data reconstructions for grid-scale Battery Energy Storage System (BESS) telemetry and commissioning verification.
+**Independent reconstruction of BESS performance-related calculations from real operating data.**
 
-Each case study in this repository follows strict epistemic rules:
-- **No dataset redistribution when an official archive exists:** source files are fetched directly from their canonical DOI/archive URL and verified against cryptographic hashes (`MD5` and `SHA-256`).
-- **Transparent post-hoc analysis:** every computation is presented as a reproducible check of published data, never as a pre-registered test.
-- **No invented contractual verdicts:** descriptive statistics are never presented as contractual round-trip efficiency (RTE) compliance or Factory/Site Acceptance Test (FAT/SAT) pass/fail judgments unless contractual test rules are explicitly known and satisfied.
+## Case 01 — One dataset, five energy ratios
 
-## Cases
+Using the published PNNL/EPRI **ENW** field dataset, we calculated the ratio of exported to imported energy under five measurement-boundary and interval-selection choices.
 
-### 1. [`enw-pnnl-epri/`](./enw-pnnl-epri/) — One BESS dataset, five plausible energy ratios
-- **Source:** PNNL / EPRI Grid-Scale BESS Operational Datasets (`ENW`, DOI [`10.5281/zenodo.22947521`](https://doi.org/10.5281/zenodo.22947521), `CC-BY-4.0`)
-- **Result:** Across the 1-minute `ENW` dataset, five standard boundary/selection choices span **`74.5%`** to **`88.9%`**. Evaluating `PGCP` and `PDC` over the common set of `70,105` valid-DC timestamps (disjoint valid-DC selection, including `102` quality-flagged intervals) isolates a **`+13.259 pp`** descriptive ratio difference (`75.607% -> 88.865%`) across metering boundaries, separate from the **`-1.120 pp`** shift (`75.607% -> 74.486%`) from adding `15,753` disconnected-DC standby minutes to `PGCP`. Note that `+13.259 pp` is a descriptive ratio shift across meter scopes rather than a directly measured component-loss attribution.
-- **Quick run:**
-  ```bash
-  pip install -r requirements.txt
-  python enw-pnnl-epri/reproduce.py
-  ```
+![ENW: five exported-to-imported energy ratios](./enw-pnnl-epri/five_ratios.png)
 
-## License
-- Code in this repository is licensed under the [MIT License](./LICENSE).
-- Third-party datasets retain their original licenses and attribution (e.g., `CC-BY-4.0` for the PNNL/EPRI Zenodo release).
+| Measurement boundary and selection | Intervals | Exported / imported |
+|---|---:|---:|
+| Battery DC (PDC), non-null DC measurements | 70,105 | **88.9%** |
+| Inverter AC (PAC), full observation period | 85,858 | **82.2%** |
+| Grid connection (PGCP), full observation period | 85,858 | **74.5%** |
+| Grid connection (PGCP), excluding any quality-flagged timestamp | 70,003 | **75.5%** |
+| Grid connection (PGCP), authors' `Use` segments | 19,487 | **79.8%** |
+
+**Controlled common-timestamp boundary comparison:** Evaluating `PGCP` and `PDC` over the common set of `70,105` valid-DC timestamps (disjoint valid-DC selection, including `102` quality-flagged intervals) isolates a **`+13.259 pp`** descriptive ratio difference (`75.607% -> 88.865%`) across metering boundaries, separate from the **`-1.120 pp`** shift (`75.607% -> 74.486%`) from adding `15,753` disconnected-DC standby minutes to `PGCP`. Note that `+13.259 pp` is a descriptive ratio shift across meter scopes rather than a directly measured component-loss attribution.
+
+The authors' published workflow supplies `QualityFlag`, `CycleIndex` and `Use`; we use those fields rather than inventing an acceptance rule.
+
+**Engineering point:** the measurement boundary and selection of operating intervals change the reported value. They must be defined before a performance claim can be evaluated.
+
+**Important:** These are *descriptive exported-to-imported ratios*, **not verified round-trip efficiency (RTE)**. The published system SoC changes from **15.8% to 92.0%** over the observation period, and the selected windows differ. This work does **not** constitute a FAT/SAT acceptance verdict or claim an error in the original research.
+
+[Open the full ENW methods and findings](./enw-pnnl-epri/README.md)
+
+## Reproduce the results
+
+From the repository root, with Python 3.12 or a compatible version:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python enw-pnnl-epri/reproduce.py
+```
+
+The script **downloads the original 6.9 MB `ENW.feather` dataset from Zenodo**, verifies its MD5 and SHA-256 checksums against the [source manifest](./enw-pnnl-epri/source_manifest.json), and calculates all five ratios. The original dataset is hosted by its publishers; the program and chart are in this repository.
+
+## Data provenance and licenses
+
+- **Original publication:** *Grid-Scale BESS Operational Datasets for Battery Modeling Research* (PNNL/EPRI, 2026).
+- **Source dataset:** [Zenodo DOI 10.5281/zenodo.22947521](https://doi.org/10.5281/zenodo.22947521), **CC BY 4.0**.
+- **VolMax reconstruction code:** [MIT License](./LICENSE).
+- **Method:** transparent, retrospective reconstruction of published measurements; not an independently commissioned acceptance test.
